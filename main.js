@@ -27,6 +27,7 @@ const oauth2 = require('simple-oauth2').create(tado_config);
 const state_attr = require(__dirname + '/lib/state_attr.js');
 const axios = require('axios');
 let polling; // Polling timer
+let pooltimer = [];
 const counter = []; // counter timer
 
 // const fs = require('fs');
@@ -66,10 +67,25 @@ class Tado extends utils.Adapter {
 	 */
 	onUnload(callback) {
 		try {
+			this.resetTimer();
 			this.log.info('cleaned everything up...');
 			callback();
 		} catch (e) {
 			callback();
+		}
+	}
+
+	async resetTimer() {
+		const states = await this.getStatesAsync('*.Rooms.*.link');
+		for (const idS in states) {
+			let deviceId = idS.split('.');
+			let pooltimerid = deviceId[2] + deviceId[4];
+			this.log.info(`Check if timer ${pooltimerid} to be cleared.`);
+			if (pooltimer[pooltimerid]) {
+                clearTimeout(pooltimer[pooltimerid]);
+				pooltimer[pooltimerid] = null;
+				this.log.info(`Timer ${pooltimerid} cleared.`);
+            }
 		}
 	}
 
@@ -143,11 +159,13 @@ class Tado extends utils.Adapter {
 								this.log.info('Temperature changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_temp);
 								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
 								this.DoConnect();
+								this.log.info('DOCONNECT DONE');
 								break;
 
 							case ('durationInSeconds'):
 								set_mode = 'TIMER';
 								this.log.info('DurationInSecond changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_durationInSeconds);
+								this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.typeSkillBasedApp',set_mode,true);
 								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
 								this.DoConnect();
 								break;
@@ -158,7 +176,6 @@ class Tado extends utils.Adapter {
 								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
 								this.DoConnect();
 								if (set_mode == 'MANUAL') {
-									this.cre
 									this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.expiry',null,true);
 									this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.durationInSeconds',null,true);
 									this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.remainingTimeInSeconds',null,true);
@@ -485,7 +502,7 @@ class Tado extends utils.Adapter {
 	clearZoneOverlay(home_id, zone_id) {
 		return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'delete');
 	}
-
+	
 	setZoneOverlay(home_id, zone_id, power, temperature, typeSkillBasedApp, durationInSeconds) {
 		const config = {
 			setting: {
@@ -515,8 +532,24 @@ class Tado extends utils.Adapter {
 			config.termination.durationInSeconds = durationInSeconds;
 		}
 
-		this.log.debug('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
-		return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
+		this.log.info('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
+		
+		return this.poolApiCall(home_id,zone_id,config);
+		//return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
+	}
+	
+	poolApiCall(home_id, zone_id, config) {
+		let pooltimerid = home_id + zone_id;
+		(function () { if (pooltimer[pooltimerid]) { clearTimeout(pooltimer[pooltimerid]); pooltimer[pooltimerid] = null; } })();
+		let that = this;
+		return new Promise(function (resolve, reject) {
+			pooltimer[pooltimerid] = setTimeout(async () => {
+				that.log.info('VOR APICALL');
+				let apiResponse = await that.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
+				that.log.info('NACH APICALL: ' + JSON.stringify(config) + ' mit '+ home_id+zone_id);
+				resolve(apiResponse);
+			}, 750)
+		});
 	}
 
 	// Unclear purpose, ignore for now
