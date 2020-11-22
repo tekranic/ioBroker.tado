@@ -159,7 +159,7 @@ class Tado extends utils.Adapter {
 								this.log.info('Temperature changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_temp);
 								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
 								//this.DoConnect();
-								this.log.info('DOCONNECT DONE');
+								//this.log.info('DOCONNECT DONE');
 								break;
 
 							case ('durationInSeconds'):
