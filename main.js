@@ -151,7 +151,7 @@ class Tado extends utils.Adapter {
 							case ('clearZoneOverlay'):
 								this.log.info('Overlay cleared for room : ' + deviceId[4] + ' in home : ' + deviceId[2]);
 								await this.clearZoneOverlay(deviceId[2],deviceId[4]);
-								this.DoConnect();
+								//this.DoConnect();
 								break;
 
 							case ('temperature'):
@@ -159,7 +159,6 @@ class Tado extends utils.Adapter {
 								this.log.info('Temperature changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_temp);
 								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
 								//this.DoConnect();
-								//this.log.info('DOCONNECT DONE');
 								break;
 
 							case ('durationInSeconds'):
@@ -167,14 +166,14 @@ class Tado extends utils.Adapter {
 								this.log.info('DurationInSecond changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_durationInSeconds);
 								this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.typeSkillBasedApp',set_mode,true);
 								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
-								this.DoConnect();
+								//this.DoConnect();
 								break;
 
 							case ('typeSkillBasedApp'):
 								if (set_mode == 'NO_OVERLAY') { break }
 								this.log.info('TypeSkillBasedApp changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_mode);
 								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
-								this.DoConnect();
+								//this.DoConnect();
 								if (set_mode == 'MANUAL') {
 									this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.expiry',null,true);
 									this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.durationInSeconds',null,true);
@@ -197,7 +196,7 @@ class Tado extends utils.Adapter {
 									this.log.info('Power changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + state.val + ' and Temperature : ' + set_temp + ' and mode : ' + set_mode);
 									await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
 								}
-								this.DoConnect();
+								//this.DoConnect();
 								break;
 
 							default:
@@ -501,6 +500,7 @@ class Tado extends utils.Adapter {
 
 	clearZoneOverlay(home_id, zone_id) {
 		return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'delete');
+		this.DoConnect();
 	}
 	
 	setZoneOverlay(home_id, zone_id, power, temperature, typeSkillBasedApp, durationInSeconds) {
@@ -547,8 +547,8 @@ class Tado extends utils.Adapter {
 				that.log.info(`Timeout set for timer '${pooltimerid}' with 750ms`);
 				let apiResponse = await that.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
 				that.log.info(`API called with  ${JSON.stringify(config)}`);
-				that.log.info(JSON.stringify(apiResponse));
 				that.DoConnect();
+				that.log.info('Data refreshed (DoConnect() called');
 				resolve(apiResponse);
 			}, 750)
 		});
