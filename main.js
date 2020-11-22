@@ -539,6 +539,11 @@ class Tado extends utils.Adapter {
 		//return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
 	}
 	
+	/**
+	 * @param {string} home_id
+	 * @param {string} zone_id
+	 * @param {object} config
+	 */
 	poolApiCall(home_id, zone_id, config) {
 		let pooltimerid = home_id + zone_id;
 		(function () { if (pooltimer[pooltimerid]) { clearTimeout(pooltimer[pooltimerid]); pooltimer[pooltimerid] = null; } })();
@@ -549,7 +554,7 @@ class Tado extends utils.Adapter {
 				let apiResponse = await that.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
 				that.log.info(`API called with  ${JSON.stringify(config)}`);
 				that.DoConnect();
-				that.log.info('Data refreshed (DoConnect() called');
+				that.log.info('Data refreshed (DoConnect()) called');
 				resolve(apiResponse);
 			}, 750)
 		});
