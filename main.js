@@ -544,9 +544,10 @@ class Tado extends utils.Adapter {
 		let that = this;
 		return new Promise(function (resolve, reject) {
 			pooltimer[pooltimerid] = setTimeout(async () => {
-				that.log.info('VOR APICALL');
+				that.log.info(`Timeout set for timer '${pooltimerid}' with 750ms`);
 				let apiResponse = await that.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
-				that.log.info('NACH APICALL: ' + JSON.stringify(config) + ' mit '+ home_id+zone_id);
+				that.log.info(`API called with  ${JSON.stringify(config)}`);
+				that.log.info(JSON.stringify(apiResponse));
 				resolve(apiResponse);
 			}, 750)
 		});
