@@ -499,8 +499,9 @@ class Tado extends utils.Adapter {
 	}
 
 	clearZoneOverlay(home_id, zone_id) {
-		return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'delete');
+		let response = this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'delete');
 		this.DoConnect();
+		return response;
 	}
 	
 	setZoneOverlay(home_id, zone_id, power, temperature, typeSkillBasedApp, durationInSeconds) {
