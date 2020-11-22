@@ -158,7 +158,7 @@ class Tado extends utils.Adapter {
 								if (set_mode == 'NO_OVERLAY') { set_mode = 'NEXT_TIME_BLOCK' }
 								this.log.info('Temperature changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_temp);
 								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds);
-								this.DoConnect();
+								//this.DoConnect();
 								this.log.info('DOCONNECT DONE');
 								break;
 
@@ -548,6 +548,7 @@ class Tado extends utils.Adapter {
 				let apiResponse = await that.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
 				that.log.info(`API called with  ${JSON.stringify(config)}`);
 				that.log.info(JSON.stringify(apiResponse));
+				that.DoConnect();
 				resolve(apiResponse);
 			}, 750)
 		});
