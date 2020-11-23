@@ -90,7 +90,7 @@ class Tado extends utils.Adapter {
 		if (polling) {
 			clearTimeout(polling);
 			polling = null;
-			this.log.info(`Polling-Timer cleared.`);
+			this.log.debug(`Polling-Timer cleared.`);
 		}
 	}
 
@@ -540,7 +540,6 @@ class Tado extends utils.Adapter {
 
 		this.log.debug('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
 		return this.poolApiCall(home_id,zone_id,config);
-		//return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
 	}
 	
 	/**
