@@ -80,11 +80,11 @@ class Tado extends utils.Adapter {
 		for (const idS in states) {
 			let deviceId = idS.split('.');
 			let pooltimerid = deviceId[2] + deviceId[4];
-			this.log.info(`Check if timer ${pooltimerid} to be cleared.`);
+			this.log.debug(`Check if timer ${pooltimerid} to be cleared.`);
 			if (pooltimer[pooltimerid]) {
 				clearTimeout(pooltimer[pooltimerid]);
 				pooltimer[pooltimerid] = null;
-				this.log.info(`Timer ${pooltimerid} cleared.`);
+				this.log.debug(`Timer ${pooltimerid} cleared.`);
 			}
 		}
 		if (polling) {
@@ -539,7 +539,6 @@ class Tado extends utils.Adapter {
 		}
 
 		this.log.debug('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
-		
 		return this.poolApiCall(home_id,zone_id,config);
 		//return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
 	}
