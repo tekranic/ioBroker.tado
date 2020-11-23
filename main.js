@@ -82,10 +82,15 @@ class Tado extends utils.Adapter {
 			let pooltimerid = deviceId[2] + deviceId[4];
 			this.log.info(`Check if timer ${pooltimerid} to be cleared.`);
 			if (pooltimer[pooltimerid]) {
-                clearTimeout(pooltimer[pooltimerid]);
+				clearTimeout(pooltimer[pooltimerid]);
 				pooltimer[pooltimerid] = null;
 				this.log.info(`Timer ${pooltimerid} cleared.`);
-            }
+			}
+		}
+		if (polling) {
+			clearTimeout(polling);
+			polling = null;
+			this.log.info(`Polling-Timer cleared.`);
 		}
 	}
 
@@ -533,7 +538,7 @@ class Tado extends utils.Adapter {
 			config.termination.durationInSeconds = durationInSeconds;
 		}
 
-		this.log.info('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
+		this.log.debug('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
 		
 		return this.poolApiCall(home_id,zone_id,config);
 		//return this.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
@@ -550,11 +555,11 @@ class Tado extends utils.Adapter {
 		let that = this;
 		return new Promise(function (resolve, reject) {
 			pooltimer[pooltimerid] = setTimeout(async () => {
-				that.log.info(`Timeout set for timer '${pooltimerid}' with 750ms`);
+				that.log.debug(`Timeout set for timer '${pooltimerid}' with 750ms`);
 				let apiResponse = await that.apiCall(`/api/v2/homes/${home_id}/zones/${zone_id}/overlay`, 'put', config);
-				that.log.info(`API called with  ${JSON.stringify(config)}`);
+				that.log.debug(`API called with  ${JSON.stringify(config)}`);
 				that.DoConnect();
-				that.log.info('Data refreshed (DoConnect()) called');
+				that.log.debug('Data refreshed (DoConnect()) called');
 				resolve(apiResponse);
 			}, 750)
 		});
