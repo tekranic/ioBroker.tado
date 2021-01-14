@@ -527,7 +527,7 @@ class Tado extends utils.Adapter {
 		if (power.toLowerCase() == 'on') {
 			config.setting.power = 'ON';
 
-			if (temperature && type != 'HOT_WATER') {
+			if (temperature && type != 'HOT_WATER' && type != 'AIR_CONDITIONING') {
 				config.setting.temperature = {};
 				config.setting.temperature.celsius = temperature;
 			}
