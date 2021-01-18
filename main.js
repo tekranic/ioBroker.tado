@@ -530,6 +530,8 @@ class Tado extends utils.Adapter {
 			if (temperature && type != 'HOT_WATER') {
 				config.setting.temperature = {};
 				config.setting.temperature.celsius = temperature;
+				config.setting.fanSpeed = 'AUTO';
+				config.setting.mode = 'COOL';
 			}
 		} else {
 			config.setting.power = 'OFF';
@@ -544,7 +546,7 @@ class Tado extends utils.Adapter {
 			config.termination.durationInSeconds = durationInSeconds;
 		}
 
-		this.log.debug('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
+		this.log.info('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
 		return this.poolApiCall(home_id,zone_id,config);
 	}
 	
