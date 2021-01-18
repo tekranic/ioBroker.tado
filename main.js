@@ -553,13 +553,17 @@ class Tado extends utils.Adapter {
 			}
 		};
 
-		if (fanSpeed != null) config.setting.fanSpeed = fanSpeed;
+		//Aircondiition: Fanspeed not allowed in modes DRY, AUTO, FAN
+		if (fanSpeed != null && mode != 'DRY' && mode != 'AUTO' && mode != 'FAN') {
+			config.setting.fanSpeed = fanSpeed;
+		}
 		if (mode != null) config.setting.mode = mode;
 
 		if (power.toLowerCase() == 'on') {
 			config.setting.power = 'ON';
 
-			if (temperature && type != 'HOT_WATER') {
+			//Temperature not fot hot water devices and not for aircondition if mode is DRY, AUTO, FAN
+			if (temperature && type != 'HOT_WATER' && mode != 'DRY' && mode != 'AUTO' && mode != 'FAN' ) {
 				config.setting.temperature = {};
 				config.setting.temperature.celsius = temperature;
 			}
