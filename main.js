@@ -114,16 +114,35 @@ class Tado extends utils.Adapter {
 					let set_power = '';
 					let set_durationInSeconds = 0;
 					let set_type = '';
+					let set_fanSpeed = '';
+					let set_tadomode = '';
 
 					const temperature = await this.getStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.setting.temperature');
 					const mode = await this.getStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.typeSkillBasedApp');
 					const power = await this.getStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.setting.power');
 					const type = await this.getStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.setting.type');
 					const durationInSeconds = await this.getStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.durationInSeconds');
+					const tadomode = await this.getStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.setting.mode');
+					const fanSpeed = await this.getStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.setting.fanSpeed');
 					
 					this.log.debug('GETS INTERESSTING!!!');
 					set_type = type.val;
 					this.log.debug('Type set : ' + set_type);
+
+					if (tadomode == null || tadomode == undefined || tadomode.val == null) {
+						set_tadomode = null;
+					} else {
+						set_tadomode = tadomode.val;
+					}
+					this.log.debug('Mode set : ' + set_tadomode);
+
+					if (fanSpeed == null || fanSpeed == undefined || fanSpeed.val == null) {
+						set_fanSpeed = null;
+					} else {
+						set_fanSpeed = fanSpeed.val;
+					}
+					this.log.debug('FanSpeed set : ' + set_tadomode);
+
 
 					if (durationInSeconds == null || durationInSeconds == undefined || durationInSeconds.val == null) {
 						set_durationInSeconds = 1800;
@@ -160,52 +179,62 @@ class Tado extends utils.Adapter {
 						switch (deviceId[x]) {
 
 							case ('clearZoneOverlay'):
-								this.log.info('Overlay cleared for room : ' + deviceId[4] + ' in home : ' + deviceId[2]);
+								this.log.info(`Overlay cleared for room: ${deviceId[4]} in home: ${deviceId[2]}`);
 								await this.clearZoneOverlay(deviceId[2],deviceId[4]);
 								//this.DoConnect();
 								break;
 
 							case ('temperature'):
 								if (set_mode == 'NO_OVERLAY') { set_mode = 'NEXT_TIME_BLOCK' }
-								this.log.info('Temperature changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_temp);
-								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type);
+								this.log.info(`Temperature changed for room: ${deviceId[4]} in home: ${deviceId[2]} to API with: ${set_temp}`);
+								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type,set_fanSpeed,set_tadomode);
 								//this.DoConnect();
 								break;
 
 							case ('durationInSeconds'):
 								set_mode = 'TIMER';
-								this.log.info('DurationInSecond changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_durationInSeconds);
-								this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.typeSkillBasedApp',set_mode,true);
-								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type);
+								this.log.info(`DurationInSecond changed for room: ${deviceId[4]} in home: ${deviceId[2]} to API with: ${set_durationInSeconds}`);
+								this.setStateAsync(`${deviceId[2]}.Rooms.${deviceId[4]}.overlay.termination.typeSkillBasedApp`,set_mode,true);
+								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type,set_fanSpeed,set_tadomode);
 								//this.DoConnect();
 								break;
 
+							case ('fanSpeed'):
+								this.log.info(`FanSpeed changed for room: ${deviceId[4]} in home: ${deviceId[2]} to API with: ${set_fanSpeed}`);
+								await this.setZoneOverlay(deviceId[2], deviceId[4], set_power, set_temp, set_mode, set_durationInSeconds, set_type, set_fanSpeed, set_tadomode);
+								break;
+
+							case ('mode'):
+								this.log.info(`Mode changed for room: ${deviceId[4]} in home: ${deviceId[2]} to API with: ${set_tadomode}`);
+								await this.setZoneOverlay(deviceId[2], deviceId[4], set_power, set_temp, set_mode, set_durationInSeconds, set_type, set_fanSpeed, set_tadomode);
+								break;
+
 							case ('typeSkillBasedApp'):
-								if (set_mode == 'NO_OVERLAY') { break }
-								this.log.info('TypeSkillBasedApp changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + set_mode);
-								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type);
+								if (set_mode == 'NO_OVERLAY') { break; }
+								this.log.info(`TypeSkillBasedApp changed for room: ${deviceId[4]} in home: ${deviceId[2]} to API with: ${set_mode}`);
+								await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type,set_fanSpeed,set_tadomode);
 								//this.DoConnect();
 								if (set_mode == 'MANUAL') {
-									this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.expiry',null,true);
-									this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.durationInSeconds',null,true);
-									this.setStateAsync(deviceId[2] + '.Rooms.' + deviceId[4] + '.overlay.termination.remainingTimeInSeconds',null,true);
+									this.setStateAsync(`${deviceId[2]}.Rooms.${deviceId[4]}.overlay.termination.expiry`,null,true);
+									this.setStateAsync(`${deviceId[2]}.Rooms.${deviceId[4]}.overlay.termination.durationInSeconds`,null,true);
+									this.setStateAsync(`${deviceId[2]}.Rooms.${deviceId[4]}.overlay.termination.remainingTimeInSeconds`,null,true);
 								}
 								break;
 
 							case ('power'):
 								if(set_mode  == 'NO_OVERLAY') {
 									if (state.val.toUpperCase() == 'ON') {
-										this.log.info('Overlay cleared for room : ' + deviceId[4] + ' in home : ' + deviceId[2]);
+										this.log.info(`Overlay cleared for room: ${deviceId[4]} in home: ${deviceId[2]}`);
 										await this.clearZoneOverlay(deviceId[2],deviceId[4]);
 									}
 									else {
 										set_mode = 'MANUAL';
-										this.log.info('Power changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + state.val + ' and Temperature : ' + set_temp + ' and mode : ' + set_mode);
-										await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type);
+										this.log.info(`Power changed for room: ${deviceId[4]} in home: ${deviceId[2]} to API with: ${state.val} and Temperature: ${set_temp} and mode: ${set_mode}`);
+										await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type,set_fanSpeed,set_tadomode);
 									}
 								} else {
-									this.log.info('Power changed for room : ' + deviceId[4] + ' in home : ' + deviceId[2] + ' to API with : ' + state.val + ' and Temperature : ' + set_temp + ' and mode : ' + set_mode);
-									await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type);
+									this.log.info(`Power changed for room: ${deviceId[4]} in home: ${deviceId[2]} to API with: ${state.val} and Temperature: ${set_temp} and mode: ${set_mode}`);
+									await this.setZoneOverlay(deviceId[2], deviceId[4],set_power,set_temp,set_mode,set_durationInSeconds,set_type,set_fanSpeed,set_tadomode);
 								}
 								//this.DoConnect();
 								break;
@@ -515,7 +544,7 @@ class Tado extends utils.Adapter {
 		return response;
 	}
 	
-	setZoneOverlay(home_id, zone_id, power, temperature, typeSkillBasedApp, durationInSeconds,type) {
+	setZoneOverlay(home_id, zone_id, power, temperature, typeSkillBasedApp, durationInSeconds,type,fanSpeed,mode) {
 		const config = {
 			setting: {
 				type: type,
@@ -524,14 +553,15 @@ class Tado extends utils.Adapter {
 			}
 		};
 
+		if (fanSpeed != null) config.setting.fanSpeed = fanSpeed;
+		if (mode != null) config.setting.mode = mode;
+
 		if (power.toLowerCase() == 'on') {
 			config.setting.power = 'ON';
 
 			if (temperature && type != 'HOT_WATER') {
 				config.setting.temperature = {};
 				config.setting.temperature.celsius = temperature;
-				config.setting.fanSpeed = 'AUTO';
-				config.setting.mode = 'COOL';
 			}
 		} else {
 			config.setting.power = 'OFF';
@@ -546,7 +576,7 @@ class Tado extends utils.Adapter {
 			config.termination.durationInSeconds = durationInSeconds;
 		}
 
-		this.log.info('Send API ZoneOverlay API call Home : ' + home_id + ' zone : ' + zone_id + ' config : ' + JSON.stringify(config));
+		this.log.info(`Send API ZoneOverlay API call Home: ${home_id} zone : ${zone_id} config: ${JSON.stringify(config)}`);
 		return this.poolApiCall(home_id,zone_id,config);
 	}
 	
@@ -759,7 +789,7 @@ class Tado extends utils.Adapter {
 					break;
 
 				default:
-					this.log.warn('Send this info to developer !!! { Unhandable information found in DoHome : ' + JSON.stringify(i) + ' with value : ' + JSON.stringify(this.Home_data[i]));
+					this.log.warn(`Send this info to developer !!! { Unhandable information found in DoHome: ${JSON.stringify(i)} with value: ${JSON.stringify(this.Home_data[i])}`);
 
 
 			}
