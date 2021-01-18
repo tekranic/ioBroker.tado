@@ -563,7 +563,7 @@ class Tado extends utils.Adapter {
 				}
 			}
 			if (mode == null) {
-				mode = 'COOL';
+				config.setting.mode = 'COOL';
 			} else {
 				config.setting.mode = mode;
 			}
