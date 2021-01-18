@@ -130,14 +130,14 @@ class Tado extends utils.Adapter {
 					this.log.debug('Type set : ' + set_type);
 
 					if (tadomode == null || tadomode == undefined || tadomode.val == null) {
-						set_tadomode = null;
+						set_tadomode = 'COOL';
 					} else {
 						set_tadomode = tadomode.val;
 					}
 					this.log.debug('Mode set : ' + set_tadomode);
 
 					if (fanSpeed == null || fanSpeed == undefined || fanSpeed.val == null) {
-						set_fanSpeed = null;
+						set_fanSpeed = 'AUTO';
 					} else {
 						set_fanSpeed = fanSpeed.val;
 					}
@@ -151,13 +151,12 @@ class Tado extends utils.Adapter {
 					}
 					this.log.debug('DurationInSeconds set : ' + set_durationInSeconds);
 
-
-					if (temperature !== null && temperature !== undefined) {
+					if (temperature !== null && temperature !== undefined && temperature.val !== 0) {
 						set_temp = parseFloat(temperature.val);
 					} else {
 						set_temp = 20;
 					}
-					this.log.debug('Room Temperature set : ' + set_temp);
+					this.log.debug(`Room Temperature set: ${set_temp}`);
 
 					if (mode == null || mode == undefined || mode.val == null) {
 						set_mode = 'NO_OVERLAY';
@@ -556,23 +555,14 @@ class Tado extends utils.Adapter {
 		if (type == 'AIR_CONDITIONING') {
 			//Aircondiition: Fanspeed not allowed in modes DRY, AUTO, FAN
 			if (mode != 'DRY' && mode != 'AUTO' && mode != 'FAN') {
-				if (fanSpeed == null) {
-					config.setting.fanSpeed = 'AUTO';
-				} else {
-					config.setting.fanSpeed = fanSpeed;
-				}
+				config.setting.fanSpeed = fanSpeed;
 			}
-			if (mode == null) {
-				config.setting.mode = 'COOL';
-			} else {
-				config.setting.mode = mode;
-			}
+			config.setting.mode = mode;
 		}
 
 		if (power.toLowerCase() == 'on') {
 			config.setting.power = 'ON';
-
-			//Temperature not fot hot water devices and not for aircondition if mode is DRY, AUTO, FAN
+			//Temperature not for hot water devices and not for aircondition if mode is DRY, AUTO, FAN
 			if (temperature && type != 'HOT_WATER' && mode != 'DRY' && mode != 'AUTO' && mode != 'FAN') {
 				config.setting.temperature = {};
 				config.setting.temperature.celsius = temperature;
