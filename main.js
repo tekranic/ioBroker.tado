@@ -132,14 +132,14 @@ class Tado extends utils.Adapter {
 					if (tadomode == null || tadomode == undefined || tadomode.val == null) {
 						set_tadomode = 'COOL';
 					} else {
-						set_tadomode = tadomode.val;
+						set_tadomode = tadomode.val.toString().toUpperCase();;
 					}
 					this.log.debug('Mode set : ' + set_tadomode);
 
 					if (fanSpeed == null || fanSpeed == undefined || fanSpeed.val == null) {
 						set_fanSpeed = 'AUTO';
 					} else {
-						set_fanSpeed = fanSpeed.val;
+						set_fanSpeed = fanSpeed.val.toString().toUpperCase();;
 					}
 					this.log.debug('FanSpeed set : ' + set_tadomode);
 
@@ -552,7 +552,7 @@ class Tado extends utils.Adapter {
 			}
 		};
 
-		if (type == 'AIR_CONDITIONING') {
+		if (type != 'AIR_CONDITIONING') {
 			//Aircondiition: Fanspeed not allowed in modes DRY, AUTO, FAN
 			if (mode != 'DRY' && mode != 'AUTO' && mode != 'FAN') {
 				config.setting.fanSpeed = fanSpeed;
